@@ -3,7 +3,6 @@
 library(plotly)
 library(dplyr)
 
-setwd("C:/Users/Evan Boyd/Desktop/College/Sports Research")
 ps = read.csv("PowerSpeed.csv",header = TRUE)
 colnames(ps) = c("Name","Year","HR","Steals","K","BB","WAR","PowerSpeed","Group","Notes")
 
