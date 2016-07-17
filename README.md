@@ -1,1 +1,1 @@
-# Baseball
+This repository is a collection of various baseball pieces by Evan Boyd, a statistics major at the University of Wisconsin-Madison. Evan is looking to go into data analytics, preferably for baseball. You can email Evan at enboyd@wisc.edu. Follow him on Twitter @eboyd42
