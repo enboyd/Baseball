@@ -1,0 +1,89 @@
+######Power-Speed Data
+
+library(plotly)
+library(dplyr)
+
+setwd("C:/Users/Evan Boyd/Desktop/College/Sports Research")
+ps = read.csv("PowerSpeed.csv",header = TRUE)
+colnames(ps) = c("Name","Year","HR","Steals","K","BB","WAR","PowerSpeed","Group","Notes")
+
+ps = tbl_df(ps)
+arrange(ps,desc(PowerSpeed))
+
+cor(ps$HR,ps$Steals)
+#-0.7160721
+
+####POWER-SPEED PLOT
+p <- plot_ly(ps, x = HR, y = Steals, text = paste("Player: ", Name),
+        mode = "markers", color = WAR) 
+p <-  layout(ps, title = 'Analyzing Power vs. Speed Batters',
+            shapes = list(
+              list(type = 'circle',
+              ##Purple - Defense guys
+                 xref = 'x', x0 = 9, x1 = 23,
+                   yref = 'y', y0 = 2, y1 = 27,
+                   fillcolor = 'rgb(50, 20, 90)', line = list(color = 'rgb(50, 20, 90)'),
+                   opacity = 0.2),
+              ##Red - Speed guys
+              list(type = 'rect',
+                   xref = 'x', x0 = 0, x1 = 13,
+                   yref = 'y', y0 = 40, y1 = 70,
+                   fillcolor = 'red', line = list(color = 'red'),
+                   opacity = 0.2),
+              ##Blue - All-Around
+              list(type = 'circle',
+                   xref = 'x', x0 = 23, x1 = 40,
+                   yref = 'y', y0 = 20, y1 = 50,
+                   fillcolor = 'rgb(30, 100, 120)', line = list(color = 'rgb(30, 100, 120)'),
+                   opacity = 0.2),
+              ##Green - POWER
+              list(type = 'rect',
+                   xref = 'x', x0 = 35, x1 = 55,
+                   yref = 'y', y0 = 0, y1 = 15,
+                   fillcolor = 'rgb(90, 200, 75)', line = list(color = 'rgb(90, 200, 75)'),
+                   opacity = 0.2)))
+
+ps %>%
+  group_by(Group) %>%
+  summarise(avg = mean(WAR)) %>%
+  arrange(avg)
+
+ps %>%
+  group_by(Group) %>%
+  summarise(avg = mean(K)) %>%
+  arrange(avg)
+
+ps %>%
+  group_by(Group) %>%
+  summarise(avg = mean(BB)) %>%
+  arrange(avg)
+
+ps %>%
+  group_by(Group) %>%
+  summarise(avg = mean(Steals)) %>%
+  arrange(avg) 
+
+ps %>%
+  group_by(Group) %>%
+  summarise(avg = mean(HR)) %>%
+  arrange(avg)
+
+
+
+###Players in Speed box: Pierre, Dee Gordon, Hamilton, Altuve,Revere,Eric Young, 
+###Everth Cabrera, Andrus, Gardner, Rajai Davis,Bourn, Segura,Crisp
+
+
+
+###Players in All-Around Box: Trout, Goldy, Carlos Gomez,Ellsbury, Kemp,Braun, Kinsler
+##Manny Machado is just under, Curtis Granderson over to the right 
+
+
+##Players in Defense Box: Kiermaier, Heyward, Brantley, Rendon, Zobrist, David Wright,
+##Alex Gordon, Longoria, Molina, Simmons, Lucroy 
+##(Lorenzo Cain, Cutch, and Pedroia just sneak out)
+
+
+###Players in Power box: Dunn, Abreu, Konerko, Fielder,Alvarez, Carter,Stanton,
+##Pujols, Encarnacion, Bautista, Harper,Donaldson,Davis,Cruz,Arenado,Cabrera
+
