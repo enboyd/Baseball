@@ -1,0 +1,188 @@
+##  Generating Batters/Pitchers Tutorial
+##  Evan Boyd
+##  enboyd@wisc.edu
+##  @eboyd42
+
+#Welcome to R! I will try and go over all of what I did through the comments (using #). 
+#If you have any questions about what I did, you can always message me on Twitter or email me.
+#Google/Stack Overflow is also a great resource.
+
+setwd("C:/Users/Evan Boyd/Desktop/R Work/Random Simulations") 
+
+batters <- read.csv("BatterTotals.csv", header = T)
+pitchers <- read.csv("PitcherTotals.csv", header = T)
+
+head(batters)
+colnames(batters)
+#You can look at just a specific column by using the $ command after the title of your table.
+batters$HR
+
+batters$HR[1]/batters$AB[1] #Find percentage of home runs in 2017 season, using total # of HR / # of AB
+batters[1,13]/batters[1,8] #Row 1, column corresponding to HR/AB, respectively (same as above command)
+
+#I will find all of the percentages using a loop. We know our column corresponding to "AB" is column 8.
+#Now all we have to do is find the percentages for HR, walk, SO, 1B, 2B, and 3B.
+#I will put this in a data.frame (a table), so I can see them all at once.
+#We already have two data frames - one for batters, and one for hitters. We can find this using the class() command.
+class(batters)
+class(hitters)
+#Note that data frames can contain strings, integer values, and character values in different columns.
+class(batters$Year)
+
+#To get singles, I need to subtract hits by 2B, 3B, and HR. I can add that as a column to my batters data frame.
+batters$Singles = batters$H - batters$X2B - batters$X3B
+
+#Let's look only at the 2017 data. I can switch the batters data frame so it is only looking at the first row, 2017.
+batters = batters[1,]
+
+percentages <- data.frame(Singles = 0, Doubles = 0, Triples = 0, HR = 0, Walk = 0, SO = 0) #Creating a column for each stat.
+#I will now assign values to each column in the data frame. I could write a loop for this, but there are
+#enough values where I can do this by hand. Also I'm lazy.
+
+percentages$Singles = batters$Singles/batters$AB #It does not really matter if you use '=' or '<-'
+percentages$Doubles = batters$X2B/batters$AB
+percentages$Triples = batters$X3B/batters$AB
+percentages$HR = batters$HR/batters$AB
+percentages$Walk = batters$HR/batters$PA
+percentages$SO = batters$SO/batters$AB
+
+
+#Now let's look at our table:
+percentages
+#So a batter struck out about 24% of the time, got a single about 20% of the time, and homered about 4% of the time.
+
+#Let's add the percentage of an out too (for now I am assuming no errors, HBP, SAC, etc..)
+percentages$Out = 1 - percentages$Singles - percentages$Doubles - percentages$Triples - percentages$HR - percentages$Walk - percentages$SO
+
+percentages #So a regular out occurs about 43% of the time. 
+
+#Now that I have these percentages, I can randomly generate a number in between some of those percentages.
+#Think of it like finding a random number inside of a confidence interval.
+#For example, the average percentage of a single is about 20%, but suppose the range in the MLB is between
+#15% and 25% (You can always adjust this). I can use the 'runif' command to generate a random number in the interval.
+
+runif(1,.15,.25) #The 1 represents how many numbers I want R to spit out.
+runif(3, 10,20)
+#See if you get any interesting numbers. When I ran the interval (10,20) three times, I got three numbers
+#all over 18. Interesting, right?
+
+#Note that the distributions are uniform. Hence, I have the same chance of getting .223 as I am getting .159.
+
+#So now let's create our batters. I will randomly generate 25 numbers in between these ranges for each stat.
+#I will assign them to their own variable.
+#Note: I would usually create actual Confidence Intervals for these numbers, but for a quick tutorial
+#I will just use values that seem logical.
+#Note that these values will be different for you than me.
+
+Batter.Single = runif(25,.15,.25)
+Batter.Single
+Batter.Double = runif(25,.01,.09)
+Batter.Double
+Batter.Triple = runif(25,0,.01)
+Batter.Triple
+Batter.HR = runif(25, .005,.07)
+Batter.HR
+Batter.BB = runif(25, .005,.10)
+Batter.BB
+Batter.SO = runif(25,.10,.39)
+Batter.SO
+
+#Now let's put this all in a data frame.
+BatterSplits = data.frame(Batter.Single,Batter.Double,Batter.Triple,Batter.HR,Batter.BB,Batter.SO)
+colnames(BatterSplits) = c("Singles","Doubles","Triples","HR","Walks","SO")
+BatterSplits
+
+#Now let's add Outs at the end, the same way we did for percentages:
+BatterSplits$Out = 1 - BatterSplits$Singles - BatterSplits$Doubles - BatterSplits$Triples - 
+  BatterSplits$HR - BatterSplits$Walk - BatterSplits$SO
+
+
+#OK, we finished with batters! Now we need to do the same for pitchers given what we want.
+#I'll use the percentages of walks, SO, HR, Hits-HR, and Outs.
+
+pitchers = pitchers[1,]
+probSO = pitchers$SO/pitchers$BF # 0.2164333
+probBB = pitchers$BB/pitchers$BF # 0.08542594
+probHR = pitchers$HR/pitchers$BF # 0.03294746
+probHit = pitchers$H/pitchers$BF - probHR # 0.1948784
+probOut = 1- probSO - probBB - probHR - probHit # 0.4703149
+
+randSO = runif(25,.10,.33)
+randBB = runif(25,.02,.14)
+randHR = runif(25,.01,.05)
+randHit = runif(25,.14,.25) - randHR
+randOut = 1 - randSO - randBB - randHR - randHit
+
+PitcherSplits = data.frame(randSO, randBB, randHR, randHit, randOut)
+colnames(PitcherSplits) = c("SO","BB","HR","H","Out")
+
+#I am going to create another column, the "PitcherNumbers" column, which will determine
+#if the numbers we want to use will belong the the hitter or the batter. I think this will be better
+#explained once I create our function.
+#Notice that I am not randomizing this, but basing it on how likely a pitcher is to get someone out.
+
+PitcherSplits$PitcherNumber = ifelse(PitcherSplits$Out + PitcherSplits$SO > .75, .70,
+       ifelse(PitcherSplits$Out+PitcherSplits$SO < .6, .50, .60))
+#Basically, if the probability of getting an out or strikeout is > .75, they have a 75% chance
+#Of directing all action to their numbers, not the batters numbers.
+
+
+##So now I need to combine the two together and see what the result will be. I can create a function
+#for this.
+#A function will run anything you want when it is given the right arguments.
+#I want this function to read in a Batters and Pitchers probabilities of getting a certain outcome.
+#I'm gonna make a lot of if/else statements.
+#A function will always need to RETURN something in an outcome. See what I do below and see if you
+#can decipher it.
+
+
+
+##These ifelse statements are saying "If the randomly generated number is in between this number
+##and this number, then it is a "Single" or a "Double" etc. etc. 
+batterVsPitcher <- function(Batter1B, Batter2B, Batter3B, BatterHR, BatterBB,
+                            BatterSO, BatterOut, PitcherSO, PitcherBB, PitcherHR,
+                            PitcherH, PitcherOut, PitcherNumbers) {
+  
+  #Generate a random number to decide whether it goes to the batter or the pitcher
+  result = ""
+  randNum = runif(1,0,1)
+  if(randNum > PitcherNumbers) {
+    randBatterNumber = runif(1,0,1) 
+    result = ifelse(randBatterNumber < Batter1B, "Single",
+                ifelse(randBatterNumber < Batter1B+Batter2B, "Double",
+                     ifelse(randBatterNumber < Batter1B+Batter2B+Batter3B, "Triple",
+                         ifelse(randBatterNumber < Batter1B+Batter2B+Batter3B+BatterHR, "Home Run",
+                                ifelse(randBatterNumber < Batter1B+Batter2B+Batter3B+BatterHR+BatterBB, "Walk",
+                                       ifelse(randBatterNumber < Batter1B+Batter2B+Batter3B+BatterHR+BatterBB+BatterSO, "Strikeout", "Out"))))))
+              
+    } else {
+    randPitcherNumber = runif(1,0,1)
+    #Notice that I adjusted the Pitcher's hits to only include singles. You can change this if you'd like.
+    result = ifelse(randPitcherNumber < PitcherSO, "Strikeout",
+                    ifelse(randPitcherNumber < PitcherSO+PitcherBB, "Walk",
+                           ifelse(randPitcherNumber < PitcherSO+PitcherBB+PitcherHR,"Home Run",
+                                  ifelse(randPitcherNumber < PitcherSO+PitcherBB+PitcherHR+PitcherH, "Single",
+                                       "Out"))))
+  }
+  
+  
+  return(result)
+}
+
+##Now let's try our work.Remember that I have to add all of the arguments it asks for: Batter1B, Batter2B...PitcherNumbers
+
+#Let's take the example of the first batter in our data vs the first pitcher.
+batterVsPitcher(BatterSplits[1,1],BatterSplits[1,2],
+                BatterSplits[1,3],BatterSplits[1,4],
+                BatterSplits[1,5], BatterSplits[1,6],
+                BatterSplits[1,7], PitcherSplits[1,1],
+                PitcherSplits[1,2],PitcherSplits[1,3],
+                PitcherSplits[1,4],PitcherSplits[1,5],
+                PitcherSplits[1,6])
+
+#Run this command a few times. See what you get!
+
+#Now ask yourself the next step. How do you take these values and store them? How do you create
+#a batting average? And finally, how to you adjust to find the best players?
+
+
