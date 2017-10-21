@@ -7,6 +7,12 @@
 #If you have any questions about what I did, you can always message me on Twitter or email me.
 #Google/Stack Overflow is also a great resource.
 
+##I have had some trouble reading files off of websites lately, but luckily,
+##you can download a CSV file from baseball reference and import it straight in!
+##Links to the tables I used:
+#Batter: https://www.baseball-reference.com/leagues/MLB/bat.shtml
+#Pitcher: https://www.baseball-reference.com/leagues/MLB/pitch.shtml
+#Save the totals table as a CSV to somewhere on your computer.
 setwd("C:/Users/Evan Boyd/Desktop/R Work/Random Simulations") 
 
 batters <- read.csv("BatterTotals.csv", header = T)
